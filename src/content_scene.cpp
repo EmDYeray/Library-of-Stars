@@ -3,7 +3,9 @@
 #include <cctype>
 #include <charconv>
 #include <fstream>
+#include <locale>
 #include <map>
+#include <sstream>
 #include <stdexcept>
 #include <variant>
 
@@ -54,8 +56,16 @@ class Parser {
             ++at;while(at<source.size() && std::isdigit(static_cast<unsigned char>(source[at])))++at;
         }
         double value=0;
+#ifdef BIBLIOTECA_IPAD
+        // libc++ in Xcode 16 does not implement floating-point from_chars.
+        std::istringstream input(std::string(source.substr(begin,at-begin)));
+        input.imbue(std::locale::classic());
+        input>>value;
+        if(!input || input.peek()!=std::char_traits<char>::eof())fail("invalid number");
+#else
         const auto result=std::from_chars(source.data()+begin,source.data()+at,value);
         if(result.ec!=std::errc{} || result.ptr!=source.data()+at)fail("invalid number");
+#endif
         return {value};
     }
     Json value(){
