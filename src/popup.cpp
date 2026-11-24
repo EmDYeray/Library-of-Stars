@@ -115,6 +115,10 @@ std::filesystem::path assetsPath(){
     const char* path=SDL_AndroidGetInternalStoragePath();
     if(!path)throw std::runtime_error(SDL_GetError());
     return std::filesystem::path(path)/"assets";
+#elif defined(BIBLIOTECA_IPAD)
+    const char* base=SDL_GetBasePath();
+    if(!base)throw std::runtime_error(SDL_GetError());
+    return std::filesystem::path(base)/"assets";
 #elif defined(_WIN32)
     char* base=SDL_GetBasePath();
     if(!base)throw std::runtime_error(SDL_GetError());

@@ -95,8 +95,13 @@ std::vector<Interface::Button> Interface::buttons() const {
             list.push_back({{x-55,h-64,45,43},Action::Left,"‹",lib.wing()>0});
             list.push_back({{x+10,h-64,45,43},Action::Right,"›",lib.wing()<1});
         }
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
+#ifdef BIBLIOTECA_IPAD
+        const double tile=std::clamp(std::min(h*.15,w*.115),42.,112.);
+        constexpr double gap=8,left=24,bottom=20;
+#else
         constexpr double tile=112,gap=8,left=24,bottom=20;
+#endif
         list.push_back({{left+tile+gap,h-bottom-3*tile-2*gap,tile,tile},Action::Forward,"↑",true});
         list.push_back({{left+tile+gap,h-bottom-tile,tile,tile},Action::Back,"↓",true});
         list.push_back({{left,h-bottom-2*tile-gap,tile,tile},Action::StrafeLeft,"←",true});
@@ -114,6 +119,12 @@ std::vector<Interface::Button> Interface::buttons() const {
         list.push_back({{x+50,h-64,43,43},Action::Right,"›",settled && lib.spread()<spreadCount(lib.selected())-1});
         if(lib.selected()!=referenceBookId)
             list.push_back({{31,topY,103,topH},Action::Motion,motion_?(isEnglish()?"Pause":"Pausar"):(isEnglish()?"Resume":"Reanudar"),true});
+#ifdef BIBLIOTECA_IPAD
+        if(lib.selected()!=referenceBookId){
+            list.push_back({{w-135,h-70,49,49},Action::ZoomOut,"−",true});
+            list.push_back({{w-78,h-70,49,49},Action::ZoomIn,"+",true});
+        }
+#endif
     }
     list.push_back({{w/2-49,topY,98,topH},Action::Language,isEnglish()?"EN / ES":"ES / EN",true});
     return list;
@@ -186,7 +197,14 @@ void Interface::showCatalog(bool show){
     catalog_=show;lib.hover(-1);dirty=true;
     if(show){lib.close();stopWalking();lookDrag_=false;}
     if(show && mouseLook_){mouseLook_=false;sdl::relativeMouse(false);}
-    if(show){refreshCatalog();focusCatalog(0);}else SDL_StopTextInput();
+    if(show){
+        refreshCatalog();
+#ifdef BIBLIOTECA_IPAD
+        catalogFocus_=0;
+#else
+        focusCatalog(0);
+#endif
+    }else sdl::textInput(false);
 }
 void Interface::openLectern(){
     if(!lib.openReferences())return;
@@ -197,7 +215,7 @@ void Interface::openLectern(){
 }
 void Interface::focusCatalog(int field){
     catalogFocus_=field;
-    if(field==0)SDL_StartTextInput();else SDL_StopTextInput();
+    sdl::textInput(field==0);
     dirty=true;
 }
 float Interface::sceneTime(float dt){
@@ -248,7 +266,7 @@ void Interface::step(float dt){
         const float f=float(motionKeys_[0])-float(motionKeys_[1]),s=float(motionKeys_[3])-float(motionKeys_[2]);
         const float dtUsed=std::min(dt,.1f);
         const float speed=(sprintKeys_[0] || sprintKeys_[1]?7.7f:4.55f)
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
             *(touchDrive_!=Action::None?2.f:1.f)
 #endif
             ;
@@ -278,40 +296,85 @@ int Interface::pointerKind() const {
     const bool movableBook=lib.selected()!=referenceBookId && lib.onReader(pos_,size_);
     return clickable || movableBook?sdl::handCursor:sdl::arrowCursor;
 }
+void Interface::cancelInput(){
+    drag_=lookDrag_=catalogDrag_=touchSwipe_=false;
+    pressed_=Action::None;
+    stopWalking();
+#ifdef BIBLIOTECA_MOBILE
+    touchDriveFinger_=touchLookFinger_=-1;
+    touchLookMoved_=false;
+#endif
+#ifdef BIBLIOTECA_IPAD
+    touchPointer_=-1;
+#endif
+    if(mouseLook_){mouseLook_=false;sdl::relativeMouse(false);}
+    dirty=true;
+}
+#ifdef BIBLIOTECA_IPAD
+void Interface::fingerPointer(SDL_EventType type,Point point,SDL_Window* window){
+    SDL_Event pointer{};
+    pointer.type=type;
+    if(type==sdl::motion){
+        pointer.motion.which=SDL_TOUCH_MOUSEID;
+        pointer.motion.x=point.x;pointer.motion.y=point.y;
+    }else{
+        pointer.button.which=SDL_TOUCH_MOUSEID;
+        pointer.button.button=SDL_BUTTON_LEFT;
+        pointer.button.x=point.x;pointer.button.y=point.y;
+    }
+    event(pointer,window);
+}
+#endif
 void Interface::event(const SDL_Event& e,SDL_Window* window){
     switch(e.type){
     case sdl::quit:quit=true;break;
-    case sdl::window:
-        if(e.window.event==11)pos_={-100,-100};
-        if(e.window.event==13){
-            drag_=lookDrag_=catalogDrag_=touchSwipe_=false;pressed_=Action::None;stopWalking();
-#ifdef __ANDROID__
-            touchDriveFinger_=touchLookFinger_=-1;
-            touchLookMoved_=false;
-#endif
-            if(mouseLook_){mouseLook_=false;sdl::relativeMouse(false);}
+#ifdef BIBLIOTECA_IPAD
+    case SDL_EVENT_WINDOW_MOUSE_LEAVE:pos_={-100,-100};dirty=true;break;
+    case SDL_EVENT_WINDOW_FOCUS_LOST:
+    case SDL_EVENT_DID_ENTER_BACKGROUND:cancelInput();break;
+    case SDL_EVENT_FINGER_CANCELED:
+        if(sdl::fingerId(e.tfinger)==touchDriveFinger_){
+            setTouchDrive(touchDrive_,false);touchDrive_=Action::None;touchDriveFinger_=-1;
+        }
+        if(sdl::fingerId(e.tfinger)==touchLookFinger_ || sdl::fingerId(e.tfinger)==touchPointer_){
+            touchLookFinger_=touchPointer_=-1;
+            touchLookMoved_=drag_=catalogDrag_=touchSwipe_=false;
+            pressed_=Action::None;
         }
         dirty=true;break;
-#ifdef __ANDROID__
-    case SDL_FINGERDOWN:{
+#else
+    case sdl::window:
+        if(e.window.event==11)pos_={-100,-100};
+        if(e.window.event==13)cancelInput();
+        dirty=true;break;
+#endif
+#ifdef BIBLIOTECA_MOBILE
+    case sdl::fingerDown:{
         const Point p{e.tfinger.x*size_.w,e.tfinger.y*size_.h};
         const auto action=actionAt(p);
         if(touchDriveFinger_==-1 && touchDriveAction(action)){
-            touchDriveFinger_=e.tfinger.fingerId;
+            touchDriveFinger_=sdl::fingerId(e.tfinger);
             touchDrive_=action;
             setTouchDrive(action,true);
             dirty=true;
-        }else if(touchLookFinger_==-1 && !catalog_ && lib.selected()<0 &&
+            break;
+        }
+#ifdef BIBLIOTECA_IPAD
+        if(touchPointer_!=SDL_FingerID(-1))break;
+        touchPointer_=sdl::fingerId(e.tfinger);
+        fingerPointer(sdl::down,p,window);
+#endif
+        if(touchLookFinger_==-1 && !catalog_ && lib.selected()<0 &&
                  p.x>size_.w*.45f && action==Action::None){
-            touchLookFinger_=e.tfinger.fingerId;
+            touchLookFinger_=sdl::fingerId(e.tfinger);
             touchLookLast_=p;
             touchLookMoved_=false;
         }
         break;
     }
-    case SDL_FINGERMOTION:{
+    case sdl::fingerMotion:{
         const Point p{e.tfinger.x*size_.w,e.tfinger.y*size_.h};
-        if(e.tfinger.fingerId==touchDriveFinger_){
+        if(sdl::fingerId(e.tfinger)==touchDriveFinger_){
             const auto next=actionAt(p);
             if(next!=touchDrive_){
                 setTouchDrive(touchDrive_,false);
@@ -319,7 +382,7 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
                 setTouchDrive(touchDrive_,true);
                 dirty=true;
             }
-        }else if(e.tfinger.fingerId==touchLookFinger_){
+        }else if(sdl::fingerId(e.tfinger)==touchLookFinger_){
             const float dx=p.x-touchLookLast_.x,dy=p.y-touchLookLast_.y;
             if(std::abs(dx)+std::abs(dy)>2.f){
                 touchLookMoved_=true;
@@ -329,29 +392,40 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
             }
             touchLookLast_=p;
         }
+#ifdef BIBLIOTECA_IPAD
+        if(sdl::fingerId(e.tfinger)==touchPointer_)fingerPointer(sdl::motion,p,window);
+#endif
         break;
     }
-    case SDL_FINGERUP:
-        if(e.tfinger.fingerId==touchDriveFinger_){
+    case sdl::fingerUp:
+        if(sdl::fingerId(e.tfinger)==touchDriveFinger_){
             setTouchDrive(touchDrive_,false);
             touchDrive_=Action::None;
             touchDriveFinger_=-1;
             dirty=true;
         }
-        if(e.tfinger.fingerId==touchLookFinger_){
+        if(sdl::fingerId(e.tfinger)==touchLookFinger_){
             if(touchLookMoved_)moved_=true;
             touchLookFinger_=-1;
             touchLookMoved_=false;
         }
+#ifdef BIBLIOTECA_IPAD
+        if(sdl::fingerId(e.tfinger)==touchPointer_){
+            touchPointer_=-1;
+            fingerPointer(sdl::up,{e.tfinger.x*size_.w,e.tfinger.y*size_.h},window);
+        }
+#endif
         break;
 #endif
-    case sdl::keyUp:
-        if(const int key=movementKey(e.key.keysym.sym);key>=0)motionKeys_[key]=false;
-        if(e.key.keysym.sym==sdl::leftShift)sprintKeys_[0]=false;
-        if(e.key.keysym.sym==sdl::rightShift)sprintKeys_[1]=false;
+    case sdl::keyUp:{
+        const int code=sdl::keyCode(e.key);
+        if(const int key=movementKey(code);key>=0)motionKeys_[key]=false;
+        if(code==sdl::leftShift)sprintKeys_[0]=false;
+        if(code==sdl::rightShift)sprintKeys_[1]=false;
         break;
+    }
     case sdl::keyDown:{
-        const int k=e.key.keysym.sym;
+        const int k=sdl::keyCode(e.key);
         if(k==9 && !catalog_ && lib.selected()<0 && !e.key.repeat){
             const bool request=!mouseLook_;
             if(!window || sdl::relativeMouse(request)==0)mouseLook_=request;
@@ -359,10 +433,10 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
         }
         if(k==1073741890 && !e.key.repeat){act(Action::Language);break;} // F9
         if(k==sdl::f2){hideControls_=!hideControls_;dirty=true;break;}
-        if(k==sdl::f11 && window){full_=!full_;SDL_SetWindowFullscreen(window,full_?sdl::fullDesktop:0);break;}
+        if(k==sdl::f11 && window){full_=!full_;sdl::fullscreen(window,full_);break;}
         if(catalog_){
             if(k==27)showCatalog(false);
-            else if(k==9 && !e.key.repeat)focusCatalog((catalogFocus_+((e.key.keysym.mod&3)?2:1))%3);
+            else if(k==9 && !e.key.repeat)focusCatalog((catalogFocus_+(sdl::shiftHeld(e.key)?2:1))%3);
             else if(k==8 && catalogFocus_==0){trimChar(search_);refreshCatalog();}
             else if(k==13 && catalogFocus_==0)choose(cursor_);
             else if((k==13 || k==' ') && catalogFocus_!=0){
@@ -374,7 +448,7 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
         }else{
             if(k==27){if(mouseLook_){mouseLook_=false;sdl::relativeMouse(false);}
                 else if(lib.selected()>=0 || lib.stage()==Stage::Traveling)lib.close();
-                else if(full_ && window){full_=false;SDL_SetWindowFullscreen(window,0);}}
+                else if(full_ && window){full_=false;sdl::fullscreen(window,false);}}
             else if(k==sdl::left)act(Action::Left);
             else if(k==sdl::right)act(Action::Right);
             else if(k=='m' && !e.key.repeat)act(Action::Motion);
@@ -400,6 +474,19 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
         break;
     case sdl::motion:{
         pos_={float(e.motion.x),float(e.motion.y)};
+#ifdef BIBLIOTECA_IPAD
+        if(e.motion.which==SDL_TOUCH_MOUSEID && catalogDrag_){
+            const int steps=int((last_.y-pos_.y)/rowHeight);
+            if(steps){
+                scroll_=std::clamp(scroll_+steps,0,std::max(0,int(results_.size())-rows));
+                last_.y-=steps*rowHeight;
+                dirty=true;
+            }
+            if(distance(pos_,start_)>8)moved_=true;
+            break;
+        }
+        if(e.motion.which==SDL_TOUCH_MOUSEID && touchSwipe_)break;
+#endif
         if((lookDrag_ || mouseLook_) && !catalog_ && lib.selected()<0){
             const float dx=mouseLook_ || e.motion.xrel!=0?float(e.motion.xrel):pos_.x-last_.x;
             const float dy=mouseLook_ || e.motion.yrel!=0?float(e.motion.yrel):pos_.y-last_.y;
@@ -419,6 +506,13 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
             pressed_=mouseLook_?Action::None:actionAt(pos_,true);
             moved_=false;
             drag_=!catalog_ && pressed_==Action::None && lib.selected()!=referenceBookId && lib.onReader(pos_,size_);
+#ifdef BIBLIOTECA_IPAD
+            if(e.button.which==SDL_TOUCH_MOUSEID && pressed_==Action::None){
+                const auto d=dialog();
+                catalogDrag_=catalog_ && d.has(pos_) && pos_.y>=d.y+132;
+                touchSwipe_=!catalog_ && lib.stage()==Stage::Reading && pos_.y>size_.h*.67f;
+            }
+#endif
             dirty=true;
         }
         break;
@@ -433,6 +527,14 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
         }else if(e.button.button==1){
             pos_={float(e.button.x),float(e.button.y)};
             const auto a=actionAt(pos_);
+#ifdef BIBLIOTECA_IPAD
+            const float dx=pos_.x-start_.x,dy=pos_.y-start_.y;
+            if(touchSwipe_ && e.button.which==SDL_TOUCH_MOUSEID &&
+               std::abs(dx)>48 && std::abs(dx)>std::abs(dy)*1.4f){
+                act(dx<0?Action::Right:Action::Left);
+                moved_=true;
+            }
+#endif
             if(!moved_ && distance(pos_,start_)<=5){
                 if(a!=Action::None && pressed_==a)act(a);
                 else if(a==Action::None && pressed_==Action::None && actionAt(pos_,true)==Action::None){
@@ -448,11 +550,11 @@ void Interface::event(const SDL_Event& e,SDL_Window* window){
                     else if(lib.stage()==Stage::Reading && !lib.onReader(pos_,size_))lib.close();
                 }
             }
-            drag_=catalogDrag_=false;pressed_=Action::None;dirty=true;
+            drag_=catalogDrag_=touchSwipe_=false;pressed_=Action::None;dirty=true;
         }
         break;
     case sdl::wheel:{
-        const float wheel=e.wheel.preciseY!=0?e.wheel.preciseY:float(e.wheel.y);
+        const float wheel=sdl::verticalWheel(e.wheel);
         const float y=e.wheel.direction==1?-wheel:wheel;
         if(catalog_){
             const int move=y==0?0:int(std::copysign(std::max(1.f,std::round(std::abs(y))),y));
@@ -474,7 +576,8 @@ std::string Interface::signature() const {
         ":"+std::to_string(int(actionAt(pos_)))+":"+std::to_string(catalog_)+":"+std::to_string(cursor_)+
         ":"+std::to_string(itemAt(pos_).value_or(-1))+":"+std::to_string(filter_)+":"+std::to_string(scroll_)+
         ":"+search_+":"+std::to_string(mouseLook_)+":"+std::to_string(hideControls_)+":"+std::to_string(size_.w)+":"+std::to_string(size_.h)+
-        ":"+std::to_string(motion_)+":"+std::to_string(catalogFocus_)+":"+std::to_string(int(pressed_));
+        ":"+std::to_string(motion_)+":"+std::to_string(catalogFocus_)+":"+std::to_string(int(pressed_))+
+        ":"+std::to_string(isEnglish());
 }
 void Interface::paint(Paint& p) const {
     if(hideControls_ && !catalog_)return;

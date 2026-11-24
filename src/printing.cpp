@@ -39,7 +39,7 @@ Color bindingColor(int id){
     return {.090+.72*base.r,.10+.74*base.g,.13+.76*base.b,1};
 }
 GLuint printSpine(int id){
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     Paint p({132,285});
     cairo_scale(p.ctx,.75,.75);
 #else
@@ -171,7 +171,7 @@ GLuint printCover(int id,bool shelf){
     const auto& book=books()[id];
     const auto foil=color(book.foil),ink=color("#fff4dc");
     const auto binding=bindingColor(id);
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     Paint p(shelf?Size{204,290}:Size{500,710});
 #else
     Paint p(shelf?Size{272,386}:Size{500,710});

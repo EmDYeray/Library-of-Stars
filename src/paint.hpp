@@ -13,7 +13,7 @@ struct Rect {
 };
 class Paint {
     cairo_surface_t* image;
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     mutable std::vector<unsigned char> rgbaPixels;
 #endif
 public:

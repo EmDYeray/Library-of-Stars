@@ -30,7 +30,7 @@ std::string readText(const std::filesystem::path& path){
 GLuint createProgram(){
     const auto dir=assetsPath()/"shaders";
     auto vertex=readText(dir/"scene.vert"),fragment=readText(dir/"scene.frag");
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     const auto forEs=[](std::string& source){
         constexpr std::string_view desktop="#version 330 core";
         if(!source.starts_with(desktop))throw std::runtime_error("Unsupported shader version");
@@ -148,7 +148,7 @@ struct Renderer::Data {
     GLuint program=createProgram(),cover=0,hudTexture=0,grainTexture=0;
     Size hudSize{},viewport{};
     GLuint maskFbo=0,maskTexture=0;
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     GLuint sceneFbo=0,sceneColor=0,sceneDepth=0;
     Size sceneSize{};
     bool sceneAvailable=true;
@@ -341,7 +341,7 @@ struct Renderer::Data {
         glDeleteTextures(doorLabels.size(),doorLabels.data());
         glDeleteTextures(referenceFolios.size(),referenceFolios.data());
         glDeleteTextures(1,&maskTexture);glDeleteTextures(1,&grainTexture);glDeleteFramebuffers(1,&maskFbo);
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
         glDeleteRenderbuffers(1,&sceneDepth);glDeleteTextures(1,&sceneColor);glDeleteFramebuffers(1,&sceneFbo);
 #endif
         glDeleteProgram(program);
@@ -516,7 +516,7 @@ struct Renderer::Data {
         const float visibleLaunchTime=state.restingBookSpread==spread?launchSeconds:0.f;
         const float motion=active && !state.turning
             ?motionStrength(pose.open,progress,spread!=target):0.f;
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
         const bool shading=false;
 #else
         const bool shading=printed && !sources && !state.turning && shadowMask(figure,state.deploy,compact,motion,seconds,visibleLaunchTime);
@@ -566,7 +566,7 @@ Renderer::~Renderer()=default;
 void Renderer::draw(const Library& lib,Size size,float seconds,float sceneScale){
     auto& d=*data;d.refreshLanguage();d.stats={};
     Size target=size;
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     const bool reduced=sceneScale<.995f && d.beginScene({std::max(1,int(size.w*sceneScale)),
         std::max(1,int(size.h*sceneScale))},target);
 #else
@@ -587,7 +587,7 @@ void Renderer::draw(const Library& lib,Size size,float seconds,float sceneScale)
     float environmentDim=1.f;
     const bool readingStory=id>=0 && id!=referenceBookId;
     const bool readingLayer=readingStory && (lib.stage()==Stage::Reading || lib.stage()==Stage::Closing);
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     const bool crispBook=reduced && readingLayer;
 #else
     const bool crispBook=false;
@@ -655,7 +655,7 @@ void Renderer::draw(const Library& lib,Size size,float seconds,float sceneScale)
     };
     if(!crispBook)drawExhaust();
     gl::depthRange(0,1);
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     if(reduced)d.presentScene(size);
     if(crispBook){
         // Only the room is upscaled. Render printed pages and pop-up geometry

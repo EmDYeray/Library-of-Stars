@@ -21,10 +21,14 @@ class Interface {
     float sceneSeconds_=0;
     Action pressed_=Action::None;
     Action touchDrive_=Action::None;
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
     SDL_FingerID touchDriveFinger_=-1,touchLookFinger_=-1;
     Point touchLookLast_{};
     bool touchLookMoved_=false;
+#endif
+#ifdef BIBLIOTECA_IPAD
+    SDL_FingerID touchPointer_=-1;
+    void fingerPointer(SDL_EventType type,Point point,SDL_Window* window);
 #endif
     int cursor_=0,filter_=0,scroll_=0;
     int catalogFocus_=0;
@@ -47,6 +51,7 @@ class Interface {
     void act(Action a);
     bool touchDriveAction(Action a) const;
     void setTouchDrive(Action a,bool down);
+    void cancelInput();
 public:
     Library lib;
     bool quit=false,dirty=true;

@@ -5,7 +5,15 @@
 #include <cstddef>
 #include <cstdint>
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) || defined(BIBLIOTECA_IPAD)
+#define BIBLIOTECA_MOBILE 1
+#endif
+
+#ifdef BIBLIOTECA_IPAD
+#include <OpenGLES/ES3/gl.h>
+#include <SDL3/SDL.h>
+#include <cairo.h>
+#elif defined(__ANDROID__)
 #include <GLES3/gl3.h>
 #include <SDL.h>
 #include <cairo.h>
@@ -150,7 +158,7 @@ constexpr GLenum texture=0x0de1,texture0=0x84c0,rgba8=0x8058,rgb8=0x8051,rgb=0x1
 constexpr GLenum wrapS=0x2802,wrapT=0x2803,clampEdge=0x812f,repeat=0x2901,minFilter=0x2801,magFilter=0x2800;
 constexpr GLenum framebuffer=0x8d40,colorAttachment=0x8ce0,complete=0x8cd5;
 constexpr GLenum framebufferBinding=0x8ca6,rgba=0x1908;
-#ifdef __ANDROID__
+#ifdef BIBLIOTECA_MOBILE
 constexpr GLenum paintFormat=rgba;
 inline void depthRange(float low,float high){glDepthRangef(low,high);}
 #else
@@ -164,6 +172,29 @@ constexpr GLenum colorBit=0x4000,depthBit=0x0100,renderer=0x1f01,multisample=0x8
 }
 
 namespace sdl {
+#ifdef BIBLIOTECA_IPAD
+constexpr auto quit=SDL_EVENT_QUIT,keyDown=SDL_EVENT_KEY_DOWN,keyUp=SDL_EVENT_KEY_UP;
+constexpr auto text=SDL_EVENT_TEXT_INPUT,motion=SDL_EVENT_MOUSE_MOTION;
+constexpr auto down=SDL_EVENT_MOUSE_BUTTON_DOWN,up=SDL_EVENT_MOUSE_BUTTON_UP,wheel=SDL_EVENT_MOUSE_WHEEL;
+constexpr auto fingerDown=SDL_EVENT_FINGER_DOWN,fingerMotion=SDL_EVENT_FINGER_MOTION,fingerUp=SDL_EVENT_FINGER_UP;
+inline SDL_FingerID fingerId(const SDL_TouchFingerEvent& event){return event.fingerID;}
+constexpr auto right=SDLK_RIGHT,left=SDLK_LEFT,downKey=SDLK_DOWN,upKey=SDLK_UP,f2=SDLK_F2,f11=SDLK_F11;
+constexpr auto leftShift=SDLK_LSHIFT,rightShift=SDLK_RSHIFT;
+constexpr int arrowCursor=SDL_SYSTEM_CURSOR_DEFAULT,grabCursor=SDL_SYSTEM_CURSOR_MOVE,handCursor=SDL_SYSTEM_CURSOR_POINTER;
+inline int keyCode(const SDL_KeyboardEvent& key){return int(key.key);}
+inline bool shiftHeld(const SDL_KeyboardEvent& key){return (key.mod&SDL_KMOD_SHIFT)!=0;}
+inline float verticalWheel(const SDL_MouseWheelEvent& wheel){return wheel.y;}
+inline void textInput(bool enabled){
+    if(auto* window=SDL_GetKeyboardFocus()){
+        if(enabled)SDL_StartTextInput(window);else SDL_StopTextInput(window);
+    }
+}
+inline void fullscreen(SDL_Window* window,bool enabled){SDL_SetWindowFullscreen(window,enabled);}
+inline int relativeMouse(bool enabled){
+    auto* window=SDL_GetKeyboardFocus();
+    return window && SDL_SetWindowRelativeMouseMode(window,enabled)?0:-1;
+}
+#else
 inline int relativeMouse(bool enabled){
 #if defined(_WIN32) || defined(__ANDROID__)
     return SDL_SetRelativeMouseMode(enabled?SDL_TRUE:SDL_FALSE);
@@ -184,10 +215,20 @@ constexpr int doubleBuffer=5,depthSize=6,msBuffers=13,msSamples=14,major=17,mino
 constexpr unsigned quit=0x100,window=0x200,keyDown=0x300,keyUp=0x301,text=0x303,motion=0x400,down=0x401,up=0x402,wheel=0x403;
 constexpr int right=0x4000004f,left=0x40000050,downKey=0x40000051,upKey=0x40000052,f2=0x4000003b,f11=0x40000044;
 constexpr int leftShift=0x400000e1,rightShift=0x400000e5;
+inline int keyCode(const SDL_KeyboardEvent& key){return key.keysym.sym;}
+inline bool shiftHeld(const SDL_KeyboardEvent& key){return (key.keysym.mod&3)!=0;}
+inline float verticalWheel(const SDL_MouseWheelEvent& wheel){return wheel.preciseY!=0?wheel.preciseY:float(wheel.y);}
+inline void textInput(bool enabled){if(enabled)SDL_StartTextInput();else SDL_StopTextInput();}
+inline void fullscreen(SDL_Window* window,bool enabled){SDL_SetWindowFullscreen(window,enabled?fullDesktop:0);}
+#ifdef __ANDROID__
+constexpr auto fingerDown=SDL_FINGERDOWN,fingerMotion=SDL_FINGERMOTION,fingerUp=SDL_FINGERUP;
+inline SDL_FingerID fingerId(const SDL_TouchFingerEvent& event){return event.fingerId;}
+#endif
 #if defined(_WIN32) || defined(__ANDROID__)
 constexpr SDL_SystemCursor arrowCursor=SDL_SYSTEM_CURSOR_ARROW,
     grabCursor=SDL_SYSTEM_CURSOR_SIZEALL,handCursor=SDL_SYSTEM_CURSOR_HAND;
 #else
 constexpr int arrowCursor=0,grabCursor=9,handCursor=11;
+#endif
 #endif
 }

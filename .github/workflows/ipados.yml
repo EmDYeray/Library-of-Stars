@@ -1,0 +1,149 @@
+name: Starry Library for iPadOS 27
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ipados-27]
+
+permissions:
+  contents: read
+
+jobs:
+  ipad:
+    runs-on: xcode-27
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sdk: iphoneos
+            triplet: arm64-ios
+          - sdk: iphonesimulator
+            triplet: arm64-ios-simulator
+    env:
+      VCPKG_REVISION: 74e6536215718009aae747d86d84b78376bf9e09
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/starry-vcpkg-cache
+      VCPKG_TRIPLET: ${{ matrix.triplet }}
+      APPLE_SDK: ${{ matrix.sdk }}
+      BUNDLE_ID: org.cuentosentreestrellas.biblioteca
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Xcode and OpenGL ES SDK
+        id: sdk
+        run: |
+          xcodebuild -version
+          version="$(xcrun --sdk "$APPLE_SDK" --show-sdk-version)"
+          echo "SDK $APPLE_SDK: $version"
+          [[ "$version" == 27.* ]]
+          test -d "$(xcrun --sdk "$APPLE_SDK" --show-sdk-path)/System/Library/Frameworks/OpenGLES.framework"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          command -v pkg-config >/dev/null || brew install pkgconf
+          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.VCPKG_DEFAULT_BINARY_CACHE }}
+          key: ipad-cairo-${{ env.VCPKG_REVISION }}-${{ matrix.triplet }}-${{ steps.sdk.outputs.version }}-${{ hashFiles('ios/vcpkg.json') }}
+
+      - name: Build Cairo and FreeType for iPad
+        run: |
+          vcpkg="$RUNNER_TEMP/vcpkg"
+          git init "$vcpkg"
+          git -C "$vcpkg" fetch --depth=1 https://github.com/microsoft/vcpkg.git "$VCPKG_REVISION"
+          git -C "$vcpkg" checkout --detach FETCH_HEAD
+          "$vcpkg/bootstrap-vcpkg.sh" -disableMetrics
+          "$vcpkg/vcpkg" install --triplet "$VCPKG_TRIPLET" --host-triplet arm64-osx \
+            --x-manifest-root="$GITHUB_WORKSPACE/ios" \
+            --x-install-root="$RUNNER_TEMP/starry-deps"
+
+      - name: Build Starry Library
+        run: |
+          unset PKG_CONFIG_PATH
+          deps="$RUNNER_TEMP/starry-deps/$VCPKG_TRIPLET"
+          export PKG_CONFIG_LIBDIR="$deps/lib/pkgconfig:$deps/share/pkgconfig"
+          cmake -S . -B build-ipad -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT="$APPLE_SDK" \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=27.0 \
+            -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
+          cmake --build build-ipad --config Release --target StarryLibrary
+          app="$GITHUB_WORKSPACE/build-ipad/Release-$APPLE_SDK/StarryLibrary.app"
+          test -x "$app/StarryLibrary"
+          cmake -E copy_directory assets "$app/assets"
+          echo "APP=$app" >> "$GITHUB_ENV"
+
+      - name: Verify and package device IPA
+        if: matrix.sdk == 'iphoneos'
+        run: |
+          set -eo pipefail
+          plutil -lint "$APP/Info.plist"
+          test "$(plutil -extract CFBundleExecutable raw -o - "$APP/Info.plist")" = StarryLibrary
+          test "$(plutil -extract CFBundleIdentifier raw -o - "$APP/Info.plist")" = "$BUNDLE_ID"
+          test "$(plutil -extract UIDeviceFamily.0 raw -o - "$APP/Info.plist")" = 2
+          test "$(plutil -extract MinimumOSVersion raw -o - "$APP/Info.plist")" = 27.0
+          scene_key=UIApplicationSceneManifest.UISceneConfigurations.UIWindowSceneSessionRoleApplication.0.UISceneDelegateClassName
+          test "$(plutil -extract "$scene_key" raw -o - "$APP/Info.plist")" = SDLUIKitSceneDelegate
+          xcrun lipo -verify_arch arm64 "$APP/StarryLibrary"
+          xcrun vtool -show-build "$APP/StarryLibrary" | tee "$RUNNER_TEMP/device-build.txt"
+          grep -E '^[[:space:]]*platform[[:space:]]+IOS$' "$RUNNER_TEMP/device-build.txt"
+          grep -E '^[[:space:]]*sdk[[:space:]]+27(\.|$)' "$RUNNER_TEMP/device-build.txt"
+          xcrun nm "$APP/StarryLibrary" > "$RUNNER_TEMP/device-symbols.txt"
+          grep -F '_OBJC_CLASS_$_SDLUIKitSceneDelegate' "$RUNNER_TEMP/device-symbols.txt"
+          staging="$(mktemp -d)"
+          mkdir -p "$staging/Payload" dist
+          ditto "$APP" "$staging/Payload/StarryLibrary.app"
+          ipa="$GITHUB_WORKSPACE/dist/Starry-Library-iPadOS27.ipa"
+          (cd "$staging" && /usr/bin/zip -q -r -y -X "$ipa" Payload)
+          unzip -tq "$ipa"
+          for path in StarryLibrary Info.plist assets/shaders/scene.frag assets/fonts/Barlow-Regular.ttf assets/popups/cohete.obj assets/covers/europa.png; do
+            unzip -p "$ipa" "Payload/StarryLibrary.app/$path" | cmp - "$APP/$path"
+          done
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.sdk == 'iphoneos'
+        with:
+          name: Starry-Library-iPadOS27
+          path: dist/Starry-Library-iPadOS27.ipa
+          if-no-files-found: error
+
+      - name: Start and exercise the app on iPadOS 27
+        if: matrix.sdk == 'iphonesimulator'
+        run: |
+          set -eo pipefail
+          xcrun simctl list runtimes
+          ipad="$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devices=json.load(sys.stdin)["devices"]
+          for runtime in sorted(devices, reverse=True):
+              if ".iOS-27-" not in runtime:
+                  continue
+              for device in devices[runtime]:
+                  if device["name"].startswith("iPad"):
+                      print(device["udid"])
+                      raise SystemExit
+          raise SystemExit("No iPad with an iOS 27 simulator runtime")')"
+          xcrun simctl bootstatus "$ipad" -b
+          codesign --force --sign - "$APP"
+          xcrun simctl install "$ipad" "$APP"
+          data="$(xcrun simctl get_app_container "$ipad" "$BUNDLE_ID" data)"
+          xcrun simctl launch "$ipad" "$BUNDLE_ID" --ipad-smoke-test
+          for i in {1..60}; do
+            marker="$(find "$data" -name starry-ipad-smoke.txt -type f -print -quit)"
+            if [[ -n "$marker" && -s "$marker" ]]; then
+              xcrun simctl io "$ipad" screenshot starry-ipad-reading.png
+              cat "$marker"
+              grep -q '^OK:' "$marker"
+              exit
+            fi
+            sleep 2
+          done
+          xcrun simctl io "$ipad" screenshot starry-ipad-reading.png
+          xcrun simctl spawn "$ipad" log show --last 3m --predicate 'process == "StarryLibrary"' --style compact
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        if: always() && matrix.sdk == 'iphonesimulator'
+        with:
+          name: Starry-Library-iPadOS27-simulator
+          path: starry-ipad-reading.png
+          if-no-files-found: ignore
