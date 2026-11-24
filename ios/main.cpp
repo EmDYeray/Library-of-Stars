@@ -93,6 +93,19 @@ struct App {
             if(fastFrames>=90){sceneScale=std::min(.85f,sceneScale+.05f);fastFrames=0;}
         }else{slowFrames=fastFrames=0;frameAverage=1.f/30.f;}
 
+        // UIKit uses a nonzero drawable framebuffer. The scene renderer binds
+        // its own depth renderbuffer; EAGL must present the drawable's color
+        // renderbuffer instead. Re-query after rotation or drawable resize.
+        GLint drawableFbo=0,drawableColor=0,attachmentType=0;
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING,&drawableFbo);
+        if(drawableFbo==0 || glCheckFramebufferStatus(GL_FRAMEBUFFER)!=GL_FRAMEBUFFER_COMPLETE)
+            return;
+        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE,&attachmentType);
+        glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER,GL_COLOR_ATTACHMENT0,
+            GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,&drawableColor);
+        if(attachmentType!=GL_RENDERBUFFER || drawableColor==0)
+            throw std::runtime_error("UIKit drawable has no color renderbuffer");
         renderer.draw(ui.lib,pixels,sceneTime,sceneScale);
         const auto signature=ui.signature();
         if(hud!=signature){
@@ -102,6 +115,8 @@ struct App {
             hud=signature;
         }else renderer.hud(nullptr);
 
+        glBindFramebuffer(GL_FRAMEBUFFER,GLuint(drawableFbo));
+        glBindRenderbuffer(GL_RENDERBUFFER,GLuint(drawableColor));
         if(smokeFrame>=0 && ui.lib.stage()==Stage::Reading && ui.lib.spread()==1){
             std::array<unsigned char,4> a{},b{};
             glReadPixels(pixels.w/2,pixels.h/8,1,1,GL_RGBA,GL_UNSIGNED_BYTE,a.data());
@@ -120,6 +135,7 @@ struct App {
 };
 
 
+std::unique_ptr<App> running;
 
 void frame(void* state){
     auto& app=*static_cast<App*>(state);
@@ -161,12 +177,9 @@ int main(int argc,char** argv){
         if(!SDL_GetWindowSize(window,&size.w,&size.h))throw std::runtime_error(SDL_GetError());
         setEnglish(false);
         auto app=std::make_unique<App>(window,size,smoke);
-        // Keep SDL_main alive and let SDL_PollEvent pump UIKit. 
-        SDL_GL_SetSwapInterval(1);
-        while(!app->ui.quit){
-            app->draw();
-            SDL_Delay(1);
-        }
+        if(!SDL_SetiOSAnimationCallback(window,1,frame,app.get()))
+            throw std::runtime_error(SDL_GetError());
+        running=std::move(app);
         return 0;
     }catch(const std::exception& error){
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"%s",error.what());
