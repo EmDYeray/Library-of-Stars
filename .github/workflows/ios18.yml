@@ -77,10 +77,18 @@ jobs:
           cmake -E copy_directory assets "$app/assets"
           echo "APP=$app" >> "$GITHUB_ENV"
 
+      - name: Save compiled iOS 18 app
+        if: matrix.sdk == 'iphoneos'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Starry-Library-iOS18-app
+          path: build-ios18/Release-iphoneos/StarryLibrary.app
+          if-no-files-found: error
+
       - name: Verify and package device IPA
         if: matrix.sdk == 'iphoneos'
         run: |
-          set -eo pipefail
+          set -euxo pipefail
           plutil -lint "$APP/Info.plist"
           test "$(plutil -extract CFBundleExecutable raw -o - "$APP/Info.plist")" = StarryLibrary
           test "$(plutil -extract CFBundleIdentifier raw -o - "$APP/Info.plist")" = "$BUNDLE_ID"
@@ -89,7 +97,7 @@ jobs:
           test "$(plutil -extract MinimumOSVersion raw -o - "$APP/Info.plist")" = 18.0
           scene_key=UIApplicationSceneManifest.UISceneConfigurations.UIWindowSceneSessionRoleApplication.0.UISceneDelegateClassName
           test "$(plutil -extract "$scene_key" raw -o - "$APP/Info.plist")" = SDLUIKitSceneDelegate
-          xcrun lipo -verify_arch arm64 "$APP/StarryLibrary"
+          xcrun lipo "$APP/StarryLibrary" -verify_arch arm64
           xcrun vtool -show-build "$APP/StarryLibrary" | tee "$RUNNER_TEMP/device-build.txt"
           grep -E '^[[:space:]]*platform[[:space:]]+IOS$' "$RUNNER_TEMP/device-build.txt"
           grep -E '^[[:space:]]*sdk[[:space:]]+18(\.|$)' "$RUNNER_TEMP/device-build.txt"
