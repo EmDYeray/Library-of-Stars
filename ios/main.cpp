@@ -3,6 +3,7 @@
 #include "ui.hpp"
 #include <SDL3/SDL_main.h>
 #include <filesystem>
+#include <cstdlib>
 #include <fstream>
 #include <memory>
 #include <stdexcept>
@@ -152,7 +153,9 @@ void frame(void* state){
 }
 
 int main(int argc,char** argv){
-    const bool smoke=argc>1 && std::string_view(argv[1])=="--ipad-smoke-test";
+    const char* smokeEnv=std::getenv("STARRY_IOS_SMOKE");
+    bool smoke=smokeEnv && std::string_view(smokeEnv)=="1";
+    for(int i=1;i<argc;++i)if(std::string_view(argv[i])=="--ipad-smoke-test")smoke=true;
     SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS,"0");
     SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS,"0");
     SDL_SetHint(SDL_HINT_ORIENTATIONS,"LandscapeLeft LandscapeRight");
@@ -176,6 +179,7 @@ int main(int argc,char** argv){
         Size size{};
         if(!SDL_GetWindowSize(window,&size.w,&size.h))throw std::runtime_error(SDL_GetError());
         setEnglish(false);
+        SDL_Log("iOS smoke mode: %s",smoke?"enabled":"disabled");
         auto app=std::make_unique<App>(window,size,smoke);
         if(!SDL_SetiOSAnimationCallback(window,1,frame,app.get()))
             throw std::runtime_error(SDL_GetError());
