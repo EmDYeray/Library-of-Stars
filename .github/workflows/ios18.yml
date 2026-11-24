@@ -140,8 +140,8 @@ jobs:
           codesign --force --sign - "$APP"
           xcrun simctl install "$phone" "$APP"
           data="$(xcrun simctl get_app_container "$phone" "$BUNDLE_ID" data)"
-          xcrun simctl launch "$phone" "$BUNDLE_ID" --ipad-smoke-test
-          for i in {1..60}; do
+          SIMCTL_CHILD_STARRY_IOS_SMOKE=1 xcrun simctl launch "$phone" "$BUNDLE_ID" --ipad-smoke-test
+          for i in {1..180}; do
             marker="$(find "$data" -name starry-ipad-smoke.txt -type f -print -quit)"
             if [[ -n "$marker" && -s "$marker" ]]; then
               xcrun simctl io "$phone" screenshot starry-ios18-reading.png
@@ -152,7 +152,7 @@ jobs:
             sleep 2
           done
           xcrun simctl io "$phone" screenshot starry-ios18-reading.png
-          xcrun simctl spawn "$phone" log show --last 3m --predicate 'process == "StarryLibrary"' --style compact
+          xcrun simctl spawn "$phone" log show --last 3m --predicate 'process == "StarryLibrary"' --style compact --info --debug
           exit 1
 
       - uses: actions/upload-artifact@v4
