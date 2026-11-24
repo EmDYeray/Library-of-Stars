@@ -58,6 +58,7 @@ jobs:
           git -C "$vcpkg" checkout --detach FETCH_HEAD
           "$vcpkg/bootstrap-vcpkg.sh" -disableMetrics
           "$vcpkg/vcpkg" install --triplet "$VCPKG_TRIPLET" --host-triplet x64-osx \
+            --overlay-triplets="$GITHUB_WORKSPACE/ios/triplets" \
             --x-manifest-root="$GITHUB_WORKSPACE/ios" \
             --x-install-root="$RUNNER_TEMP/starry-deps"
 
