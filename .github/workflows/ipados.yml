@@ -22,7 +22,6 @@ jobs:
             triplet: arm64-ios-simulator
     env:
       VCPKG_REVISION: 74e6536215718009aae747d86d84b78376bf9e09
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ runner.temp }}/starry-vcpkg-cache
       VCPKG_TRIPLET: ${{ matrix.triplet }}
       APPLE_SDK: ${{ matrix.sdk }}
       BUNDLE_ID: org.cuentosentreestrellas.biblioteca
@@ -39,7 +38,8 @@ jobs:
           test -d "$(xcrun --sdk "$APPLE_SDK" --show-sdk-path)/System/Library/Frameworks/OpenGLES.framework"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           command -v pkg-config >/dev/null || brew install pkgconf
-          mkdir -p "$VCPKG_DEFAULT_BINARY_CACHE"
+          mkdir -p "$RUNNER_TEMP/starry-vcpkg-cache"
+          echo "VCPKG_DEFAULT_BINARY_CACHE=$RUNNER_TEMP/starry-vcpkg-cache" >> "$GITHUB_ENV"
 
       - uses: actions/cache@v4
         with:
