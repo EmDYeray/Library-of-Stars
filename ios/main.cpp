@@ -119,7 +119,7 @@ struct App {
     }
 };
 
-std::unique_ptr<App> running;
+
 
 void frame(void* state){
     auto& app=*static_cast<App*>(state);
@@ -161,9 +161,12 @@ int main(int argc,char** argv){
         if(!SDL_GetWindowSize(window,&size.w,&size.h))throw std::runtime_error(SDL_GetError());
         setEnglish(false);
         auto app=std::make_unique<App>(window,size,smoke);
-        if(!SDL_SetiOSAnimationCallback(window,1,frame,app.get()))
-            throw std::runtime_error(SDL_GetError());
-        running=std::move(app);
+        // Keep SDL_main alive and let SDL_PollEvent pump UIKit. 
+        SDL_GL_SetSwapInterval(1);
+        while(!app->ui.quit){
+            app->draw();
+            SDL_Delay(1);
+        }
         return 0;
     }catch(const std::exception& error){
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,"%s",error.what());
