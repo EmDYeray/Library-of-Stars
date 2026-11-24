@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   ipad:
-    runs-on: macos-15-arm64
+    runs-on: macos-15
     timeout-minutes: 50
     strategy:
       fail-fast: false
@@ -18,8 +18,10 @@ jobs:
         include:
           - sdk: iphoneos
             triplet: arm64-ios
+            arch: arm64
           - sdk: iphonesimulator
-            triplet: arm64-ios-simulator
+            triplet: x64-ios-simulator
+            arch: x86_64
     env:
       VCPKG_REVISION: 74e6536215718009aae747d86d84b78376bf9e09
       VCPKG_TRIPLET: ${{ matrix.triplet }}
@@ -55,7 +57,7 @@ jobs:
           git -C "$vcpkg" fetch --depth=1 https://github.com/microsoft/vcpkg.git "$VCPKG_REVISION"
           git -C "$vcpkg" checkout --detach FETCH_HEAD
           "$vcpkg/bootstrap-vcpkg.sh" -disableMetrics
-          "$vcpkg/vcpkg" install --triplet "$VCPKG_TRIPLET" --host-triplet arm64-osx \
+          "$vcpkg/vcpkg" install --triplet "$VCPKG_TRIPLET" --host-triplet x64-osx \
             --x-manifest-root="$GITHUB_WORKSPACE/ios" \
             --x-install-root="$RUNNER_TEMP/starry-deps"
 
@@ -66,7 +68,7 @@ jobs:
           export PKG_CONFIG_LIBDIR="$deps/lib/pkgconfig:$deps/share/pkgconfig"
           cmake -S . -B build-ios18 -G Xcode \
             -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT="$APPLE_SDK" \
-            -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_OSX_DEPLOYMENT_TARGET=18.0 \
+            -DCMAKE_OSX_ARCHITECTURES="${{ matrix.arch }}" -DCMAKE_OSX_DEPLOYMENT_TARGET=18.0 \
             -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=NO
           cmake --build build-ios18 --config Release --target StarryLibrary
           app="$GITHUB_WORKSPACE/build-ios18/Release-$APPLE_SDK/StarryLibrary.app"
