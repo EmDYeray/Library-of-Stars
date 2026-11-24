@@ -1,4 +1,5 @@
 #include "popup.hpp"
+#include "locale.hpp"
 #include "book_art.hpp"
 #include "stories.hpp"
 #include <charconv>
@@ -67,7 +68,65 @@ const std::array<PopupAsset,popupCount>& popupAssets(){
         {"apolo-easep.obj","Apollo 11 · Surface experiments"},
         {"insight-capas.obj","InSight · Layers of Mars"}
     }};
-    return assets;
+    static constexpr std::array<PopupAsset,popupCount> assetsSpanish{{
+        {"satelite.obj","Satélite de comunicaciones"},
+        {"observador.obj","Satélite de observación"},
+        {"cohete.obj","Vehículo de lanzamiento"},
+        {"estacion.obj","Estación orbital"},
+        {"antena.obj","Antena parabólica"},
+        {"vehiculo.obj","Vehículo de exploración"},
+        {"sonda.obj","Sonda espacial"},
+        {"telescopio.obj","Telescopio orbital"},
+        {"marte.obj","Marte · Rover de exploración"},
+        {"europa.obj","Europa · Sonda del hielo"},
+        {"luna.obj","La Luna · Módulo de descenso"},
+        {"saturno.obj","Saturno · Sonda entre los anillos"},
+        {"tierra.obj","Tierra · Observación orbital"},
+        {"sol.obj","El Sol · Observatorio solar"},
+        {"marte-cantera.obj","Marte · Cantera y taladro"},
+        {"europa-crevasse.obj","Europa · Paso sobre la grieta"},
+        {"luna-puesto.obj","La Luna · Puesto polar"},
+        {"saturno-travesia.obj","Saturno · Travesía de la sonda"},
+        {"tierra-nocturna.obj","Tierra · Relevo nocturno"},
+        {"sol-corona.obj","El Sol · Escudo de la sonda"},
+        {"orbita-ensamble.obj","Órbita · Banco de ensamble"},
+        {"tierra-incendio.obj","Tierra · Inspección del valle"},
+        {"europa-descenso.obj","Europa · Ensayo de descenso"},
+        {"orbita-atraque.obj","Órbita · Puerto de atraque"},
+        {"marte-tormenta.obj","Marte · Refugio de la tormenta"},
+        {"luna-capsula.obj","La Luna · Cápsula de relevo"},
+        {"saturno-lunas.obj","Saturno · Lunas y hielo disperso"},
+        {"sol-fulguracion.obj","El Sol · Fulguración solar"},
+        {"marte-cumbre.obj","Marte · Estación en la cresta"},
+        {"apolo-eagle.obj","Apolo 11 · Eagle"},
+        {"apolo-intrepid.obj","Apolo 12 · Intrepid"},
+        {"apolo-falcon.obj","Apolo 15 · Falcon y el coche lunar"},
+        {"kepler-telescopio.obj","Kepler · Telescopio espacial"},
+        {"kepler-transito.obj","Kepler · Tránsito de un planeta"},
+        {"pioneer-jupiter.obj","Pioneer 10 · Encuentro con Júpiter"},
+        {"insight-marte.obj","InSight · Estación sísmica marciana"},
+        {"rovers-gemelos.obj","Marte · Spirit y Opportunity"},
+        {"pioneer-salida.obj","Pioneer 10 · Salida de la Tierra"},
+        {"pioneer-asteroides.obj","Pioneer 10 · Cinturón de asteroides"},
+        {"pioneer-placa.obj","Pioneer 10 · La placa"},
+        {"pioneer-senal.obj","Pioneer 10 · Una señal lejana"},
+        {"kepler-equilibrio.obj","Kepler · El equilibrio de K2"},
+        {"kepler-campo.obj","Kepler · Un nuevo campo de estrellas"},
+        {"apolo-muestras.obj","Apolo 11 · Muestras lunares"},
+        {"apolo-red.obj","Apolo · Una estación científica"},
+        {"apolo-surveyor.obj","Apolo 12 · Surveyor 3"},
+        {"apolo-impacto.obj","Apolo 12 · Un impacto registrado"},
+        {"apolo-hadley.obj","Apolo 15 · Recorrido por Hadley"},
+        {"apolo-caida.obj","Apolo 15 · El martillo y la pluma"},
+        {"insight-ondas.obj","InSight · Ondas sísmicas"},
+        {"insight-taladro.obj","InSight · La sonda térmica"},
+        {"insight-polvo.obj","InSight · Polvo en los paneles"},
+        {"marte-travesia.obj","Marte · Ruedas en la ladera"},
+        {"orbita-sistemas.obj","Órbita · Sistemas del hábitat"},
+        {"apolo-easep.obj","Apolo 11 · Experimentos de superficie"},
+        {"insight-capas.obj","InSight · Capas de Marte"}
+    }};
+    return isEnglish()?assets:assetsSpanish;
 }
 int popupIndex(int book,int spread){
     using A=Illustration;

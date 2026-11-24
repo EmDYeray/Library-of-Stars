@@ -8,74 +8,74 @@ const AdultSpread& childSpread(int book,int spread){
     using Story=std::array<AdultSpread,spreads>;
     static constexpr std::array<Story,7> stories{{
         Story{{
-            {"Smoke above the valley","Ines saw smoke near a mountain. The photo came from a camera in space.","He asked for another photo. He wanted to know if the smoke came out of the ground."},
-            {"Two Photographs","Both photos looked the same. Ines used a camera that could see the heat.","The fire went up the mountain. The wind was pushing him into town."},
-            {"Under the cloud","A cloud covered the valley. The team found photos from earlier.","The heat chamber gave another lead. There was fire at the dry river."},
-            {"A radio map","The satellite was about to be hidden behind the mountain. That's a little while to send the map.","Ines first sent a small copy. The fire department was clear and clear."},
-            {"The closed bridge","A car with a camera saw a tree fall onto the bridge. That's a bad place to get through.","The team found another way across the river."},
-            {"Another View","A photo was taken from a ship. He was showing smoke where nobody had seen him before.","The trucks could have moved their way. At late afternoon, the new path remained free."},
-            {"The mark of fire","Three days later, Ines saw the mountain again. The burned ground looks dark.","He put his photos back and forth. That's how far the fire had come."},
-            {"The river back","The following year, water returned to the river. Some plants were already growing.","Ines drew the sprouts on his map. That's how his life came back."}
+            {"Humo sobre el valle","Inés vio humo cerca de una montaña. La foto venía de una cámara en el espacio.","Pidió otra foto. Quería saber si el humo salía del suelo."},
+            {"Dos fotos","Las dos fotos parecían iguales. Inés usó una cámara que podía ver el calor.","El fuego subía por la montaña. El viento lo empujaba hacia el pueblo."},
+            {"Debajo de la nube","Una nube tapó el valle. El equipo buscó fotos de antes.","La cámara de calor dio otra pista. Había fuego cerca del río seco."},
+            {"Un mapa por radio","El satélite iba a ocultarse detrás de la montaña. Quedaba poco tiempo para mandar el mapa.","Inés mandó primero una copia pequeña. Los bomberos pudieron abrirla enseguida."},
+            {"El puente cerrado","Un coche con cámara vio un árbol caído sobre el puente. Por allí no se podía pasar.","El equipo encontró otro camino al otro lado del río."},
+            {"Otra vista","Desde una nave tomaron una foto de lado. Mostraba humo donde antes nadie lo había visto.","Los camiones pudieron cambiar de ruta. Al caer la tarde, el nuevo camino seguía libre."},
+            {"La marca del fuego","Tres días después, Inés volvió a mirar la montaña. La tierra quemada se veía oscura.","Guardó las fotos del antes y el después. Así se veía hasta dónde había llegado el fuego."},
+            {"El río de vuelta","Al año siguiente, el agua volvió al río. Algunas plantas ya estaban creciendo.","Inés dibujó los brotes en el mapa. Esta vez contaba cómo volvía la vida."}
         }},
         Story{{
-            {"A river of ice","Mateo saw a dark line in Europe, a moon of Jupiter. It felt like a frozen river.","He put his place on the map. I wanted to look at the crack again."},
-            {"Two Views","The ship turned and the crack came from the photo. Luckily, there was a little bit at the edge.","Mateo put together two photos. At second place, a shadow shown that the ice was up there."},
-            {"The dark shore","The antenna only got half the photo. The shadow part was still missing.","The team requested another hearing. I needed to know if a robot could come down without falling."},
-            {"A glow that moves","A light point changed place as the ship turned. He looked like a mirror under the sun.","Mateo compared his photos. The glow moved. The crack remained at the same place."},
-            {"Testing the Ice","On Earth they did a path with test ice. The car slipped near the edge.","They tried for a bigger share. The tires have been passing with care this time."},
-            {"A rock on the map","The satellite sent a final photo. At the end of the crack was a dark rock.","Mateo tagged her. The rock could help find the way."},
-            {"Two Routes","The rocket would have a copy of the map to the next team.","There was a path by the crack and another way. They could choose to see the ice."},
-            {"The blue fringe","The sun came up onto the edge. The ice shines with blue.","Mateo put up his photo. Now I could see the crack from one shore to another."}
+            {"Un río de hielo","Mateo vio una raya oscura en Europa, una luna de Júpiter. Parecía un río congelado.","Marcó el lugar en el mapa. Quería mirar la grieta otra vez."},
+            {"Dos miradas","La nave giró y la grieta salió de la foto. Por suerte, había quedado un pedacito en el borde.","Mateo juntó dos fotos. En la segunda, una sombra mostraba que el hielo se levantaba allí."},
+            {"La orilla oscura","La antena solo recibió la mitad de la foto. La parte en sombra todavía no se veía.","El equipo pidió otra vista. Necesitaba saber si un robot podía bajar sin caer."},
+            {"Un brillo que se mueve","Un punto de luz cambió de lugar cuando la nave giró. Parecía un espejo bajo el Sol.","Mateo comparó las fotos. El brillo se movió. La grieta siguió en el mismo sitio."},
+            {"Hielo de prueba","En la Tierra hicieron un camino con hielo de prueba. El coche resbaló cerca del borde.","Lo intentaron por una parte más ancha. Esta vez las ruedas pasaron con cuidado."},
+            {"Una piedra en el mapa","El satélite mandó una última foto. Al final de la grieta se veía una roca oscura.","Mateo la marcó. La roca podía ayudar a encontrar el camino."},
+            {"Dos caminos","El cohete llevaría una copia del mapa al próximo equipo.","Había una ruta junto a la grieta y otra más lejos. Podían elegir al ver el hielo."},
+            {"La franja azul","El Sol salió sobre el borde. El hielo brilló de azul.","Mateo guardó la foto. Ahora podía ver la grieta de una orilla a la otra."}
         }},
         Story{{
-            {"Do you hear me?","Aurora was a satellite. When she came out of the shade, her panels came back to light.","Vera heard a beep eight seconds late. He looked at his watch and tested again."},
-            {"On the roof","Vera's up to the roof. That's another dish-shaped antenna.","He heard the same beeping late. I knew the first antenna was not the cause."},
-            {"A loose piece","Another ship took a photo from his side. One piece moved next to Aurora's camera.","The piece covered up the stars Aurora used to figure out where she was looking."},
-            {"A small turn","On Earth, Vera turned a copy of Aurora. He found a place where light came in.","He asked the ship to do the same turn. The beep's back in time!"},
-            {"The piece at the table","An engineer tested a copy of the piece at his table. He moved her and tipped his edge.","He tipped his end a little and tested again. That time there was space between the pieces."},
-            {"Two Marks","The rocket had a new piece with two painted stripes.","The camera looked at his stripes. If they parted, they would know that the piece had been bent."},
-            {"Sunlight and Shadow","The piece passed from the sun's heat to the cold shade. The stripes followed his place.","Aurora could have been looking at the stars with nothing to do with his camera."},
-            {"A beep in time","Vera turned the radio on as the sun came up. Aurora's beep came at his hour.","He put it away to remember how a piece so small could change the whole journey."}
+            {"¿Me oyen?","Aurora era un satélite. Cuando salió de la sombra, sus paneles volvieron a recibir luz.","Vera oyó un pitido ocho segundos tarde. Miró el reloj y volvió a probar."},
+            {"En la azotea","Vera subió al techo. Allí había otra antena con forma de plato.","Oyó el mismo pitido tarde. Ya sabía que la primera antena no era la causa."},
+            {"Una pieza floja","Otra nave tomó una foto de lado. Una pieza se movía junto a la cámara de Aurora.","La pieza tapaba las estrellas que Aurora usaba para saber hacia dónde miraba."},
+            {"Un giro pequeño","En la Tierra, Vera giró una copia de Aurora. Encontró un lado por donde entraba la luz.","Le pidió a la nave que hiciera el mismo giro. ¡El pitido volvió a tiempo!"},
+            {"La pieza en la mesa","Un ingeniero probó una copia de la pieza en su mesa. Al moverla, rozaba el borde.","Dobló la punta un poquito y volvió a probar. Esta vez quedó espacio entre las piezas."},
+            {"Dos marcas","El cohete llevó una pieza nueva con dos rayas pintadas.","La cámara miró las rayas. Si se separaban, sabrían que la pieza se había doblado."},
+            {"Sol y sombra","La pieza pasó del calor del Sol al frío de la sombra. Las rayas siguieron en su sitio.","Aurora pudo mirar las estrellas sin que nada tapara su cámara."},
+            {"Un pitido a tiempo","Vera encendió la radio cuando salió el Sol. El pitido de Aurora llegó a su hora.","Lo guardó para acordarse de cómo una pieza tan pequeña pudo cambiar todo el viaje."}
         }},
         Story{{
-            {"First Tracks","Nadia looked at the robot's prints with tires. The sun was painting the stones of orange.","The robot stopped by a crack. Nadia would look for a more flat place to get through."},
-            {"Turn around","A photo from above shown rock steps that the robot couldn't see.","Nadia drew a ride up a firmer ground."},
-            {"A Slipping Wheel","On his way up, a wheel slipped and put up powder. Below was a dark stone.","Nadia put the robot back. In his second attempt, he surrounded the stone."},
-            {"Photos by Radio","A ship passed onto the robot. I could send photos to Earth for a few minutes.","Nadia received a photo with clear stripes on the rock. He wanted to see her closely."},
-            {"The striped stone","The robot's arm put his camera down to a Red Stone. He had colorful stripes.","His drill pulled a little bit. Nadia saved a photo of his place."},
-            {"A cloud of dust","The sky became dark. Nadia let the robot wait at a flat place.","When the powder fell, the camera saw the prints of the road again."},
-            {"The Earth hears","An antenna on Earth received the photos that the robot had saved.","In a photo, the way back was still clear."},
-            {"The Red Route","At dawn, the robot went up again. From above you saw the edge of a big hole.","Nadia put up his map. The prints told where his robot had been."}
+            {"Primeras huellas","Nadia miró las huellas del robot con ruedas. El Sol pintaba las piedras de naranja.","El robot se paró junto a una grieta. Nadia buscaría un lugar más plano para pasar."},
+            {"Dar la vuelta","Una foto desde arriba mostró escalones de roca que el robot no podía ver.","Nadia dibujó una vuelta por un terreno más firme."},
+            {"Una rueda resbala","Al subir, una rueda se deslizó y levantó polvo. Debajo había una piedra oscura.","Nadia hizo retroceder al robot. En el segundo intento, rodeó la piedra."},
+            {"Fotos por radio","Una nave pasó sobre el robot. Podía mandar fotos a la Tierra durante unos minutos.","Nadia recibió una foto con rayas claras en la roca. Quiso verla de cerca."},
+            {"La piedra de rayas","El brazo del robot bajó su cámara hasta una piedra roja. Tenía rayas de colores.","Su taladro sacó un pedacito. Nadia guardó una foto del lugar donde lo encontró."},
+            {"Una nube de polvo","El cielo se oscureció. Nadia dejó que el robot esperara en un lugar plano.","Cuando cayó el polvo, la cámara volvió a ver las huellas del camino."},
+            {"La Tierra escucha","Una antena en la Tierra recibió las fotos que el robot había guardado.","En una foto, el camino de regreso seguía limpio."},
+            {"La ruta roja","Al amanecer, el robot volvió a subir. Desde arriba se veía el borde de un gran hoyo.","Nadia guardó el mapa. Las huellas contaban por dónde había pasado su robot."}
         }},
         Story{{
-            {"A glow by the Moon","Iris saw a little bit of rock near a ship's path.","The ship waited while Iris requested another photo. The rock was coming his way."},
-            {"A rock that turns","A camera looked at the rock from both sides. He was small and brilliant and turned so fast.","Iris chose to put the ship away. It was safer than guessing how big a rock was."},
-            {"News by Radio","An antenna sent the new way to the ship. From Earth they have been expecting his answer.","When the answer came, Iris put together his old and new path."},
-            {"Three Flashes","The camera saw three lights. It was the light of the Sun on a corner of the rock.","When we saw another flash, the team could have known where it was going."},
-            {"A soft push","The ship turned its engines on for a few seconds to get a little back.","Iris looks at new photos. The rock would come from behind with plenty of space."},
-            {"The friendly ship","Another ship came with a new crew. He had the path Iris had drawn.","The two ships met and they still had fuel to get back."},
-            {"The rock goes far","Two cameras measured where the rock was. They both saw his way back.","Iris got his notice. He saved his photos to explain how they had known."},
-            {"Four legs on the moon","The ship came down with a big light hole. One foot touched the powder before the other.","Iris got a photo from the ground. They saw prints, a round house and two antennas."}
+            {"Un brillo junto a la Luna","Iris vio un pedacito de roca cerca del camino de una nave.","La nave esperó mientras Iris pedía otra foto. La roca se acercaba a su camino."},
+            {"Una roca que gira","Una cámara miró la roca desde dos lados. Era pequeña, brillante y giraba muy rápido.","Iris prefirió apartar la nave. Era más seguro que adivinar el tamaño de la roca."},
+            {"Una noticia por radio","Una antena envió el nuevo camino a la nave. Desde la Tierra esperaron su respuesta.","Cuando llegó la respuesta, Iris puso juntos el camino viejo y el nuevo."},
+            {"Tres pestañeos","La cámara vio tres destellos. Era la luz del Sol sobre una esquina de la roca.","Al ver otro destello, el equipo pudo saber hacia dónde se movía."},
+            {"Un empujón suave","La nave prendió sus motores durante unos segundos para apartarse un poco.","Iris miró las fotos nuevas. La roca pasaría por detrás, con espacio de sobra."},
+            {"La nave amiga","Otra nave llegó con una tripulación nueva. Tenía el camino que Iris había dibujado.","Las dos naves se encontraron y todavía les quedaba combustible para volver."},
+            {"La roca se aleja","Dos cámaras midieron dónde estaba la roca. Las dos vieron que ya se alejaba.","Iris quitó el aviso. Guardó las fotos para explicar cómo lo habían sabido."},
+            {"Cuatro patas en la Luna","La nave bajó junto a un gran hoyo iluminado. Una pata tocó el polvo antes que las otras.","Iris recibió una foto del suelo. Se veían huellas, una casita redonda y dos antenas."}
         }},
         Story{{
-            {"A Closer Look at Saturn","Leo got a message from his ship. He was about to come to SaturN, the planet of great rings.","The ship saw how the rings drew a thin shade onto the planet."},
-            {"A quick photo","The ship had little time to take a photo of Saturn. He pointed his camera and waited.","The second attempt, the photo went well. He saw the whole light border."},
-            {"A photo in parts","The first photo came in two parts. At first we didn't know what was earlier.","Leo looked at the time written at every place. That's how she could put them back together."},
-            {"Behind the planet","On the other side of Saturne, the ship was dark. Leo put out some equipment.","With the remaining power, the ship was able to save another photo."},
-            {"A spark","Reeling to the Sun, the ship shone as a point by the ring.","Leo compared his photo with his map. The ship was still on its way."},
-            {"A cloud of ice","A new image saw a bright fringe next to a Saturn moon.","Leo put the place up. He wanted to know if that moon was throwing some ice."},
-            {"Save Two Copies","The next rocket would have a camera that could have more photos.","Leo asked to put his time at every place. That's how they could get them together if they parted again."},
-            {"The photo of the morning","The last photo came at dawn. One side of the rings was golden and the other was dark.","Leo sent her with his hour. Near the border was the shade of a ring."}
+            {"Saturno de cerca","Leo recibió un mensaje de su nave. Se acercaba a Saturno, el planeta de los grandes anillos.","La nave vio cómo los anillos dibujaban una sombra fina sobre el planeta."},
+            {"Una foto rápida","La nave tenía poco tiempo para tomar una foto de Saturno. Apuntó su cámara y esperó.","En el segundo intento, la foto salió bien. Se veía todo el borde iluminado."},
+            {"Una foto en partes","La primera foto llegó en dos partes. Al principio no se sabía cuál iba antes.","Leo miró la hora escrita en cada parte. Así pudo volver a unirlas."},
+            {"Detrás del planeta","Del otro lado de Saturno, la nave quedó a oscuras. Leo apagó algunos aparatos.","Con la energía que quedaba, la nave pudo guardar una foto más."},
+            {"Una chispa","Al asomarse de nuevo al Sol, la nave brilló como un punto junto al anillo.","Leo comparó la foto con su mapa. La nave seguía en el camino esperado."},
+            {"Una nube de hielo","En una imagen nueva se veía una franja brillante junto a una luna de Saturno.","Leo apuntó el lugar. Quería saber si aquella luna lanzaba pedacitos de hielo."},
+            {"Guardar dos copias","El próximo cohete llevaría una cámara que podía guardar más fotos.","Leo pidió poner la hora en cada parte. Así podrían juntarlas si volvían a separarse."},
+            {"La foto de la mañana","Al amanecer llegó la última foto. Un lado de los anillos era dorado y el otro oscuro.","Leo la envió con la hora. Cerca del borde se veía la sombra de un anillo."}
         }},
         Story{{
-            {"The Sun Grows Restless","Amalia saw a big flash at the Sun. Shortly after, several radios stopped listening.","He wrote down his hour of flash and his hour of cuts. He wanted to know if they had happened together."},
-            {"The Rooftop Antenna","A school had an antenna on its roof. His cable was broken by the sun's heat.","The teacher put up a new cable. At nightfall they have been expecting a message from the satellite."},
-            {"A bridge that's gone","The map sent messages to a bridge that no longer existed. That was an old map.","Amalia requested a new photo. He drew the school as his new meeting place."},
-            {"A box in the yard","A small car brought a radio box to the yard. His camera read his label.","The teacher saw that was the right box. They could send messages by now."},
-            {"Two schools listen","A ship passed over the valley and sent an announcement to two schools.","The two teachers read the message and put their time in their notebook."},
-            {"Another way to message","Amalia asked another ship to copy the notice. He wanted to prove his help.","He turned his first radio off for a minute. The schools continued to hear the message."},
-            {"Replacement equipment","Ground they prepared a rocket with another radio box. Amalia put his map right next to him.","The next announcement could have been a two-way ride if one stopped functioning."},
-            {"The Sun Grows Calm","When the radios returned, the ship took a new photo of the Sun. The bright area had been calm.","Amalia put together the photo and history of both schools."}
+            {"El Sol se agita","Amalia vio un destello muy grande en el Sol. Poco después, varias radios dejaron de oírse.","Anotó la hora del destello y la de los cortes. Quería saber si habían ocurrido juntos."},
+            {"La antena del techo","Una escuela tenía una antena en el techo. Su cable estaba roto por el calor del Sol.","La maestra puso un cable nuevo. Al anochecer esperaron un mensaje del satélite."},
+            {"Un puente que ya no está","El mapa mandaba los mensajes a un puente que ya no existía. Era un mapa viejo.","Amalia pidió una foto nueva. Dibujó la escuela como el nuevo punto de encuentro."},
+            {"Una caja en el patio","Un coche pequeño llevó una caja de radio hasta el patio. Su cámara leyó la etiqueta.","La maestra vio que era la caja correcta. Ya podían enviar mensajes."},
+            {"Dos escuelas escuchan","Una nave pasó sobre el valle y envió el aviso a dos escuelas.","Las dos maestras leyeron el mensaje y apuntaron la hora en su cuaderno."},
+            {"Otro camino para el mensaje","Amalia pidió a otra nave que copiara el aviso. Quería probar si servía de ayuda.","Apagó la primera radio por un minuto. Las escuelas siguieron oyendo el mensaje."},
+            {"Un equipo de repuesto","En tierra prepararon un cohete con otra caja de radio. Amalia dejó el mapa corregido al lado.","El próximo aviso podría viajar por dos caminos si uno dejaba de funcionar."},
+            {"El Sol se calma","Cuando las radios volvieron, la nave tomó una foto nueva del Sol. La zona brillante se había calmado.","Amalia guardó juntas la foto y la historia de las dos escuelas."}
         }}
     }};
     return stories[static_cast<int>(destination(book))][spread];

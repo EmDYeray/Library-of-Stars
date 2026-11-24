@@ -2,6 +2,7 @@
 #include "adult_books.hpp"
 #include "book_art.hpp"
 #include "child_text.hpp"
+#include "locale.hpp"
 #include "paint.hpp"
 #include "popup.hpp"
 #include "references.hpp"
@@ -206,7 +207,7 @@ GLuint printReferencePage(int index){
     p.gradient({0,0,w,h},0,0,w,h,color("#d0ab74",.24),color("#fff9eb",.45));
     p.round({26,24,w-52,h-48},9,color("#f8edda",0),fine);
     p.fill({48,51,6,75},accent);
-    p.display(69);p.text(69,112,mars?"Mars":"Moon",ink);
+    p.display(69);p.text(69,112,mars?(isEnglish()?"Mars":"Marte"):(isEnglish()?"Moon":"Luna"),ink);
     p.line(60,151,w-60,151,fine,2);
     p.line(60,435,w-60,435,fine,2);
     p.line(60,729,w-60,729,fine,2);

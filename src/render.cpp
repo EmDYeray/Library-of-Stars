@@ -350,6 +350,8 @@ struct Renderer::Data {
         if(lastLanguage==isEnglish())return;
         lastLanguage=isEnglish();
         clearPages();
+        glDeleteTextures(referenceFolios.size(),referenceFolios.data());
+        referenceFolios.fill(0);
         glDeleteTextures(spines.size(),spines.data());spines.fill(0);
         glDeleteTextures(shelfCovers.size(),shelfCovers.data());shelfCovers.fill(0);
     }
